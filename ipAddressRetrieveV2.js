@@ -1,6 +1,5 @@
 import { LightningElement, api } from 'lwc';
 import { FlowAttributeChangeEvent } from 'lightning/flowSupport';
-import getClientIpAddress from '@salesforce/apex/IpAddressController.getClientIpAddress';
 import logError from '@salesforce/apex/ErrorLoggerCls.logError';
 
 export default class IpAddressRetrieve extends LightningElement {
@@ -8,12 +7,17 @@ export default class IpAddressRetrieve extends LightningElement {
 
     async connectedCallback() {
         try {
-            const ip = await getClientIpAddress();
-            if (ip) {
-                this.ipAddr = ip;
+            const response = await fetch('/services/apexrest/getClientIp/');
+            if (!response.ok) {
+                this.logErrorToServer('Network response was not ok: ' + response.statusText);
+                return;
+            }
+            const data = await response.json();
+            if (data && data.ip) {
+                this.ipAddr = data.ip;
                 this.dispatchEvent(new FlowAttributeChangeEvent('ipAddr', this.ipAddr));
             } else {
-                this.logErrorToServer('No IP returned from server');
+                this.logErrorToServer('Invalid response data: ' + JSON.stringify(data));
             }
         } catch (error) {
             this.logErrorToServer('connectedCallback error: ' + error.message);
