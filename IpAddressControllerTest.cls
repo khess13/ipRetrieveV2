@@ -40,4 +40,7 @@ public class IpAddressControllerTest {
         }
         Test.stopTest();
 
-        System.assertEquals(false, exceptionThrown, 'No exception
+        System.assertEquals(false, exceptionThrown, 'No exception should be thrown');
+        System.assertEquals(500, RestContext.response.statusCode, 'Status code should be 500 on error');
+    }
+}
